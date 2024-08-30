@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { IndustryEnum } from 'src/interfaces';
+import { Profile } from 'src/modules/profiles/entities/profile.entity';
 
 export type CompanyDocument = Company & Document;
 
@@ -11,36 +11,36 @@ export class Company {
   @Prop({ required: true })
   name: string;
 
-  @ApiProperty({ description: 'Company description' })
+  @ApiProperty({ description: 'Company description', required: false })
   @Prop()
-  description: string;
+  description?: string;
 
-  @ApiProperty({ description: 'Company website URL' })
+  @ApiProperty({ description: 'Company website URL', required: false })
   @Prop()
-  website: string;
+  website?: string;
 
-  @ApiProperty({ description: 'Company address' })
+  @ApiProperty({ description: 'Company address', required: false })
   @Prop()
-  address: string;
+  address?: string;
 
-  @ApiProperty({ description: 'City where the company is located' })
+  @ApiProperty({ description: 'City where the company is located', required: false })
   @Prop()
-  city: string;
+  city?: string;
 
-  @ApiProperty({ description: 'Location description' })
+  @ApiProperty({ description: 'Latitude for geolocation', required: false, type: Number })
   @Prop()
-  location: string;
+  latitude?: number;
 
-  @ApiProperty({ description: 'Latitude for geolocation' })
+  @ApiProperty({ description: 'Longitude for geolocation', required: false, type: Number })
   @Prop()
-  latitude: number;
+  longitude?: number;
 
-  @ApiProperty({ description: 'Longitude for geolocation' })
-  @Prop()
-  longitude: number;
+  @ApiProperty({ description: 'Number of employees in the company', required: false, type: Number })
+  @Prop({ type: Number })
+  totalEmployees?: number;
 
   @ApiProperty({ description: 'Reference to the user ID who created this entry', type: String })
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: Profile.name, required: true })
   createdBy: string;
 
   @ApiProperty({ description: 'Creation timestamp', readOnly: true })
