@@ -11,6 +11,7 @@ import { SocialsModule } from "./socials/socials.module";
 import { UsersModule } from "./users/users.module";
 
 export const Modules=[
+	UsersModule,
 	ApplicationsModule,
 	CompaniesModule,
 	EducationModule,
@@ -20,6 +21,5 @@ export const Modules=[
 	JobsModule,
 	ProfilesModule,
 	ReviewsModule,
-	SocialsModule,
-	UsersModule
+	SocialsModule
 ]

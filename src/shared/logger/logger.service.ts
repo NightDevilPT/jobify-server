@@ -1,14 +1,17 @@
-import { Injectable, Scope, LoggerService as LoggerBase } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import pino from 'pino';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class LoggerService implements LoggerBase {
+export class LogService {
   private logger: pino.Logger;
-  private readonly context: string;
+  private context: string;
 
-  constructor(context: string) {
-    this.context = context; // Store the context (e.g., command handler name)
+  constructor() {
     this.configureLogger();
+  }
+
+  public setContext(context: string) {
+    this.context = context;
   }
 
   private configureLogger() {
