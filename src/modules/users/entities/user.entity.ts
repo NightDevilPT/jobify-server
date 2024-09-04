@@ -23,6 +23,10 @@ export class User {
   @Prop({ required: true })
   password: string;
 
+  @ApiProperty({ description: 'Hashed password' })
+  @Prop({ })
+  token?: string;
+
   @ApiProperty({ description: 'User type', enum: UserTypeEnum })
   @Prop({ required: true, enum: UserTypeEnum })
   userType: string;

@@ -1,12 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HashService } from 'src/shared/hash/hash.service';
 import { CreateUserCommand } from '../impl/create-user.command';
-import { CreateUserDto } from '../../dto/create-user.dto';
 import { UserRepository } from '../../repository/user.repository';
 import { LogService } from 'src/shared/logger/logger.service';
 import { Types } from 'mongoose';
 import { MongoServerError } from 'mongodb';
-import { ConflictException } from '@nestjs/common';
+import { ErrorService } from 'src/shared/error/error.service';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
@@ -14,6 +13,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     private readonly hashService: HashService,
     private readonly userRepository: UserRepository,
     private readonly logger: LogService,
+    private readonly error: ErrorService,
   ) {
     this.logger.setContext(CreateUserHandler.name);
   }
@@ -30,6 +30,9 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       const hashedPassword = await this.hashService.hashPassword(
         createUserDto.password,
       );
+      const token = await this.hashService.hashPassword(
+        new Date().toLocaleString(),
+      );
 
       // Explicitly generate a new ObjectId
       const generatedId = new Types.ObjectId();
@@ -38,6 +41,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
         ...createUserDto,
         _id: generatedId, // Set the generated _id
         password: hashedPassword,
+        token,
       };
 
       this.logger.debug('Creating user in the repository...', 'execute');
@@ -47,14 +51,17 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
         `User successfully created with ID: ${createdUser._id}`,
         'execute',
       );
-      return createdUser;
+      return {
+        message: 'email verification link sended to your Mail-Id',
+        status: 201,
+      };
     } catch (error) {
       if (error instanceof MongoServerError && error.code === 11000) {
         this.logger.error(
           `Duplicate email error: ${createUserDto.email}`,
           'execute',
         );
-        throw new ConflictException(
+        throw this.error.handleConflictError(
           `A user with the email ${createUserDto.email} already exists.`,
         );
       } else {
@@ -63,7 +70,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
           error.stack,
           'execute',
         );
-        throw error; // Re-throw other unexpected errors
+        throw this.error.handleServerError(error); // Re-throw other unexpected errors
       }
     }
   }
